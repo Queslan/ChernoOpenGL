@@ -2,6 +2,18 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+static unsigned int CompileShader(unsigned int type, const std::string& source) {
+	unsigned int id = glCreateShader(GL_VERTEX_SHADER);
+	const char* src = source.c_str();
+	glShaderSource(id, 1, &src, nullptr);
+}
+static int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
+	
+	unsigned int program = glCreateProgram();
+	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+	
+
+}
 
 int main(void) {
 	GLFWwindow* window;
@@ -25,6 +37,7 @@ int main(void) {
 
 	std::cout << glGetString(GL_VERSION) << '\n';
 
+	//Positions of vertices
 	float positions[6] = {
 		-0.5f, -0.5f,
 		 0.0f,  0.5f,
@@ -36,7 +49,9 @@ int main(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
 
+	
 	glEnableVertexAttribArray(0);
+	//Layout
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float), positions);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
