@@ -1,2 +1,2 @@
 # ChernoOpenGL
-Exercises with OpenGL from ChernoProject youtube chanel
+Exercises with OpenGL from ChernoProject youtube channel
