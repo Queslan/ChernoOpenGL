@@ -12,9 +12,6 @@ struct VertexBufferElement {
 };
 
 class VertexBufferLayout {
-private:
-	std::vector <VertexBufferElement> m_Elemements;
-	unsigned int m_Stride;
 public:
 	VertexBufferLayout();;
 
@@ -24,5 +21,8 @@ public:
 
 	const std::vector<VertexBufferElement>& GetElements() const;
 	unsigned int GetStride() const;
+private:
+	std::vector <VertexBufferElement> m_Elemements;
+	unsigned int m_Stride;
 };
 

@@ -1,87 +1,18 @@
 // docs.gl - site with openGL commands description
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
+
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Shader.h"
 
-
-
-struct ShaderProgramSource {
-	std::string vertexSource;
-	std::string fragmentSource;
-};
-
-static ShaderProgramSource ParseShader(const std::string filepath) {
-	std::ifstream stream(filepath);
-
-	enum class ShaderType{
-		NONE = -1, VERTEX = 0, FRAGMENT = 1
-	};
-
-	std::string line;
-	std::stringstream ss[2];
-	ShaderType type = ShaderType::NONE;
-		while (getline(stream, line)) {
-			if (line.find("#shader") != std::string::npos) {
-				if (line.find("vertex") != std::string::npos){
-					type = ShaderType::VERTEX;
-				}
-				else if (line.find("fragment") != std::string::npos) {
-					type = ShaderType::FRAGMENT;
-				}
-			}
-			else {
-				ss[(int)type] << line << '\n';
-			}
-		}
-		return { ss[0].str(), ss[1].str() };
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source) {
-	GLCall(unsigned int id = glCreateShader(type)); // Creates a shader object
-	const char* src = source.c_str();
-	GLCall(glShaderSource(id, 1, &src, nullptr)); // Replaces the source code in a shader object
-	GLCall(glCompileShader(id));
-
-	int result;
-	GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
-
-	if (result == GL_FALSE) {
-		int length;
-		GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
-		char* message = (char*)alloca(length * sizeof(char)); // The way to get array of length length
-		GLCall(glGetShaderInfoLog(id, length, &length, message));
-		std::cout << "Failed to compile " <<
-			(type == GL_VERTEX_SHADER ? "vertex" : "fragment") << '\n';
-		std::cout << message << '\n';
-		GLCall(glDeleteShader(id));
-		return 0;
-	}
-	return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
-
-	GLCall(unsigned int program = glCreateProgram()); // Creates a program object
-	GLCall(unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader));
-	GLCall(unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader));
-
-	GLCall(glAttachShader(program, vs)); // Attaches a shader object to a program object
-	GLCall(glAttachShader(program, fs));
-	GLCall(glLinkProgram(program)); // Links a program object
-	GLCall(glValidateProgram(program)); // Validates a program object
-
-	GLCall(glDeleteShader(vs));
-	GLCall(glDeleteShader(fs));
-
-	return program;
-}
 
 int main(void) {
 	GLFWwindow* window;
@@ -92,7 +23,7 @@ int main(void) {
 
 	
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(777, 777, "777", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		return -1;
@@ -132,21 +63,16 @@ int main(void) {
 
 		IndexBuffer ib(indices, 6);
 	
-	
-		ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-		unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource);
-		GLCall(glUseProgram(shader));
-
-		GLCall(int location = glGetUniformLocation(shader, "u_Color"));
-		ASSERT(location != -1);
-		GLCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
-	
+		Shader shader("res/shaders/Basic.shader");
+		shader.Bind();
+		shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+		
 		/* Unbind all */
-		GLCall(glBindVertexArray(0));
-		GLCall(glUseProgram(0));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-
+		va.Unbind();
+		vb.Unbind();
+		ib.Unbind();
+		shader.Unbind();
+		
 		float r = 0.0f;
 		float changeValue = 0.05f;
 	
@@ -155,8 +81,8 @@ int main(void) {
 			/* Render here */
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-			GLCall(glUseProgram(shader));
-			GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+			shader.Bind();	
+			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
   		
 			va.Bind();
 			ib.Bind();
@@ -175,8 +101,6 @@ int main(void) {
 			/* Poll for and process events */
 			glfwPollEvents();
 		}
-
-		GLCall(glDeleteProgram(shader));
 	}
 	glfwTerminate();
 	return 0;

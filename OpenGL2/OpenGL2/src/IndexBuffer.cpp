@@ -21,3 +21,7 @@ void IndexBuffer::Bind() const {
 void IndexBuffer::Unbind() const {
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); // Bind a named buffer object
 }
+
+inline unsigned int IndexBuffer::getCount() const {
+	return m_Count;
+}
