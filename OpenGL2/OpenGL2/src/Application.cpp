@@ -3,16 +3,17 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <fstream>
 #include <string>
+#include <fstream>
 #include <sstream>
 
 #include "Renderer.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
 
+#include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
+#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
 
 int main(void) {
 	GLFWwindow* window;
@@ -35,9 +36,9 @@ int main(void) {
 	glfwSwapInterval(1); // setup window to refresh same rate as monitor
 
 	if (glewInit() != GLEW_OK)
-		std::cout << "ERROR" << std::endl;
+		std::cout << "glewInit ERROR" << '\n';
 
-	std::cout << glGetString(GL_VERSION) << '\n';
+	std::cout << glGetString(GL_VERSION) << '\n'; // show used version of opengl
 	
 	{ // Extra scope for variables to be deleted from stack
 		//Positions of vertices
@@ -53,7 +54,6 @@ int main(void) {
 			2, 3, 0
 		};
 
-
 		VertexArray va;
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
 
@@ -64,8 +64,6 @@ int main(void) {
 		IndexBuffer ib(indices, 6);
 	
 		Shader shader("res/shaders/Basic.shader");
-		shader.Bind();
-		shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
 		
 		/* Unbind all */
 		va.Unbind();
@@ -73,6 +71,7 @@ int main(void) {
 		ib.Unbind();
 		shader.Unbind();
 		
+		Renderer renderer;
 		float r = 0.0f;
 		float changeValue = 0.05f;
 	
@@ -83,11 +82,9 @@ int main(void) {
 
 			shader.Bind();	
 			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-  		
-			va.Bind();
-			ib.Bind();
-		
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+			
+			renderer.Draw(va, ib, shader);
+
 
 			if (r > 1.0f)
 				changeValue = -0.05f;
@@ -95,6 +92,8 @@ int main(void) {
 				changeValue = 0.05f;
 
 			r += changeValue;
+
+
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
 

@@ -7,7 +7,7 @@ public:
 
 	void Bind() const;
 	void Unbind() const ;
-	inline unsigned int getCount() const;
+	unsigned int getCount() const;
 private:
 	unsigned int m_RenderID;
 	unsigned int m_Count;
