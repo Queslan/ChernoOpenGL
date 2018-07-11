@@ -8,6 +8,8 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
+
 
 
 struct ShaderProgramSource {
@@ -108,28 +110,25 @@ int main(void) {
 	
 	{ // Extra scope for variables to be deleted from stack
 		//Positions of vertices
-		float positions[] = {
+		float positions[] {
 			-0.5f, -0.5f, // 0
 			 0.5f, -0.5f, // 1
 			 0.5f,	0.5f, // 2
 			-0.5f,  0.5f  // 3
 		};
 
-		unsigned int indices[]{
+		unsigned int indices[] {
 			0, 1, 2,
 			2, 3, 0
 		};
 
-		unsigned int vao;
-		GLCall(glGenVertexArrays(1, &vao)); // generate vertex array object names
-		GLCall(glBindVertexArray(vao)); // Bind vertex array object
 
+		VertexArray va;
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-	
-	
-		GLCall(glEnableVertexAttribArray(0)); // Enable a generic vertex attribute array
-		// This bind Vertex Array with Vertex Buffer that is binded right now 
-		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0)); // Define an array of generic vertex attribute data
+
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+		va.AddBuffer(vb, layout);
 
 		IndexBuffer ib(indices, 6);
 	
@@ -159,7 +158,7 @@ int main(void) {
 			GLCall(glUseProgram(shader));
 			GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
   		
-			GLCall(glBindVertexArray(vao));
+			va.Bind();
 			ib.Bind();
 		
 			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
