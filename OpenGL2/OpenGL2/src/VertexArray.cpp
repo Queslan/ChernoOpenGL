@@ -30,7 +30,7 @@ void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
 	for (unsigned int i = 0; i < elements.size(); i++)
 	{
 		const auto& element = elements[i];
-		GLCall(glEnableVertexAttribArray(0)); // Enable a generic vertex attribute array
+		GLCall(glEnableVertexAttribArray(i)); // Enable a generic vertex attribute array
 		 // This bind Vertex Array with Vertex Buffer that is binded right now 
 		GLCall(glVertexAttribPointer(i, element.count, element.type, element.normalized, 
 			layout.GetStride(), (const void*)offset)); // Define an array of generic vertex attribute data
